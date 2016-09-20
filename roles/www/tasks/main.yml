@@ -1,0 +1,69 @@
+---
+
+- name: Upgrade existing packages
+  apt: upgrade=dist
+
+- name: Install Apache 2, PHP 5 and extensions
+  apt: name={{ item }} state=present
+  with_items:
+    - apache2
+    - mysql-server
+    - php5
+    - php5-cli
+    - libapache2-mod-php5
+    - php5-mcrypt
+    - php5-mysql
+    - openjdk-7-jre
+
+- name: Download elasticsearch
+  get_url:
+    url: https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/2.4.0/elasticsearch-2.4.0.deb
+    dest: /usr/src/elasticsearch-2.4.0.deb
+    mode: 0777
+
+- name: Install elasticsearch
+  apt: deb=/usr/src/elasticsearch-2.4.0.deb
+
+- name: Install Apache configuration files
+  template: src=apache2/{{ item }} dest=/etc/apache2/{{ item }}
+  with_items:
+    - apache2.conf
+    - envvars
+    - mods-available/dir.conf
+    - sites-available/000-default.conf
+  notify:
+    - reload httpd
+
+- name: Install PHP configuration
+  template: src=php.ini dest=/etc/php5/apache2/php.ini
+  notify:
+    - restart httpd
+
+- name: Install elasticsearch configuration files
+  template: src=elasticsearch/{{ item }} dest=/etc/elasticsearch/{{ item }}
+  with_items:
+    - elasticsearch.yml
+  notify:
+    - restart elasticsearch
+
+- name: Install composer
+  shell: curl -sS https://getcomposer.org/installer | php creates=/usr/local/bin/composer
+
+- name: Move composer to global location
+  shell: mv composer.phar /usr/local/bin/composer removes=composer.phar
+
+- name: Set composer to executable
+  file: path=/usr/local/bin/composer mode=0755
+
+#- name: Update composer
+#  shell: /usr/local/bin/composer self-update
+#  register: composer_update
+#  changed_when: "'Updating to version' in composer_update.stdout"
+
+- name: Start and enable apache
+  service: name=apache2 state=started enabled=yes
+
+- name: Start and enable elasticsearch
+  service: name=elasticsearch state=started enabled=yes
+
+

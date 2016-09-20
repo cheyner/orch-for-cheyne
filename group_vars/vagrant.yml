@@ -1,0 +1,30 @@
+---
+# Misc
+timezone: "America/New_York"
+
+# Apache
+apache_user: "vagrant"
+apache_group: "vagrant"
+apache_host: "127.0.0.1"
+apache_web_base: "/vagrant"
+apache_web_public: "public"
+
+# PHP
+php_display_errors: "On"
+php_display_startup_errors: "On"
+php_error_reporting: "E_ALL"
+php_upload_max_filesize: "10M"
+
+# Database
+db_host: "localhost"
+db_database: ""
+db_username: "root"
+db_password: ""
+db_port: 3306
+
+# Xdebug
+xdebug_remote_enable: "On"
+xdebug_connect_back: "On"
+xdebug_idekey: ""
+xdebug_remote_host: ""
+xdebug_remote_autostart: ""
